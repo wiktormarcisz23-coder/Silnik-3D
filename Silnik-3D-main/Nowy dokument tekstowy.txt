@@ -1,0 +1,35 @@
+import os
+
+# === KONFIGURACJA ===
+FOLDER_ZRODLOWY = "src"        # folder z plikami (np. ".")
+PLIK_WYJSCIOWY = "wszystko.txt"
+DOZWOLONE_ROZSZERZENIA = {
+    ".cpp", ".h", ".hpp", ".c",
+    ".py", ".txt", ".md",
+    ".glsl", ".vert", ".frag"
+}
+# ====================
+
+def is_text_file(filename):
+    return os.path.splitext(filename)[1].lower() in DOZWOLONE_ROZSZERZENIA
+
+with open(PLIK_WYJSCIOWY, "w", encoding="utf-8") as out:
+    for root, _, files in os.walk(FOLDER_ZRODLOWY):
+        for file in sorted(files):
+            if not is_text_file(file):
+                continue
+
+            path = os.path.join(root, file)
+            rel_path = os.path.relpath(path, FOLDER_ZRODLOWY)
+
+            out.write("\n" + "=" * 80 + "\n")
+            out.write(f"PLIK: {rel_path}\n")
+            out.write("=" * 80 + "\n\n")
+
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    out.write(f.read())
+            except Exception as e:
+                out.write(f"[BŁĄD ODCZYTU PLIKU: {e}]\n")
+
+print(f"Zapisano do pliku: {PLIK_WYJSCIOWY}")

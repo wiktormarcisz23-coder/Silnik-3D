@@ -1,0 +1,3 @@
+C:/Users/wikto/Desktop/Silnik-3D-main/out/build/x64-Debug/CMakeFiles/OpenGL_Labs.dir
+C:/Users/wikto/Desktop/Silnik-3D-main/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/wikto/Desktop/Silnik-3D-main/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
