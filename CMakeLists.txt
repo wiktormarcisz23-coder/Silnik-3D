@@ -6,14 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(OpenGL REQUIRED)
 
 # ===== FREEGLUT =====
-set(FREEGLUT_ROOT "C:/Users/wikto/Downloads/freeglut_OK")
-
-include_directories(
-    ${FREEGLUT_ROOT}/include
-    C:/Users/wikto/Downloads/glm-master
-)
-
-link_directories(${FREEGLUT_ROOT}/lib/x64)
+set(FREEGLUT_ROOT "C:/Users/wikto/Downloads/glutek")
 
 add_executable(OpenGL_Labs
     src/main.cpp
@@ -22,7 +15,14 @@ add_executable(OpenGL_Labs
     src/Cube.cpp
 )
 
-target_link_libraries(OpenGL_Labs
+# Include directories
+target_include_directories(OpenGL_Labs PRIVATE
+    ${FREEGLUT_ROOT}/include
+    C:/Users/wikto/Downloads/glm-master
+)
+
+# Link libraries (EXPLICITNIE plik .lib)
+target_link_libraries(OpenGL_Labs PRIVATE
     OpenGL::GL
-    freeglut
+    "${FREEGLUT_ROOT}/lib/x64/freeglut.lib"
 )

@@ -11,3 +11,18 @@ glm::mat4 Camera::getView() const
 {
     return glm::lookAt(position, target, up);
 }
+
+void Camera::moveForward(float d)
+{
+    glm::vec3 dir = glm::normalize(target - position);
+    position += dir * d;
+    target += dir * d;
+}
+
+void Camera::moveRight(float d)
+{
+    glm::vec3 dir = glm::normalize(target - position);
+    glm::vec3 right = glm::normalize(glm::cross(dir, up));
+    position += right * d;
+    target += right * d;
+}

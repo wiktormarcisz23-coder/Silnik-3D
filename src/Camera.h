@@ -8,6 +8,9 @@ public:
     Camera();
     glm::mat4 getView() const;
 
+    void moveForward(float d);
+    void moveRight(float d);
+
 private:
     glm::vec3 position;
     glm::vec3 target;

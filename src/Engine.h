@@ -17,16 +17,21 @@ private:
     static void displayCallback();
     static void reshapeCallback(int w, int h);
     static void keyboardCallback(unsigned char key, int x, int y);
+    static void specialCallback(int key, int x, int y);
     static void idleCallback();
 
     void display();
     void reshape(int w, int h);
     void keyboard(unsigned char key);
+    void special(int key);
     void idle();
 
     Camera camera;
     Cube cube;
 
-    float angle;
+    float angleX;
+    float angleY;
     bool perspective;
+
+    GLuint textureID;
 };
