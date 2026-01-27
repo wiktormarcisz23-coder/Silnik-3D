@@ -1,7 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <GL/freeglut.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Camera.h"
 #include "Cube.h"
 
@@ -17,21 +20,24 @@ private:
     static void displayCallback();
     static void reshapeCallback(int w, int h);
     static void keyboardCallback(unsigned char key, int x, int y);
-    static void specialCallback(int key, int x, int y);
     static void idleCallback();
 
     void display();
     void reshape(int w, int h);
     void keyboard(unsigned char key);
-    void special(int key);
     void idle();
 
     Camera camera;
     Cube cube;
 
-    float angleX;
-    float angleY;
-    bool perspective;
+    // LAB 9
+    float angle;
+    float lookA;
 
-    GLuint textureID;
+    int width;
+    int height;
+
+    // LAB 10
+    glm::vec3 lightPos;
+    bool smoothShading;
 };

@@ -1,11 +1,26 @@
 #include "Cube.h"
 #include <cstring>
+#include <cmath>
+
+static void normalize(float v[3])
+{
+    float len = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    v[0] /= len;
+    v[1] /= len;
+    v[2] /= len;
+}
 
 Cube::Cube()
 {
     float v[8][3] = {
-        {-20,-20,-20},{20,-20,-20},{20,20,-20},{-20,20,-20},
-        {-20,-20, 20},{20,-20, 20},{20,20, 20},{-20,20, 20}
+        {-20,-20,-20},
+        { 20,-20,-20},
+        { 20, 20,-20},
+        {-20, 20,-20},
+        {-20,-20, 20},
+        { 20,-20, 20},
+        { 20, 20, 20},
+        {-20, 20, 20}
     };
     memcpy(vertices, v, sizeof(v));
 
@@ -19,34 +34,33 @@ Cube::Cube()
     };
     memcpy(indices, i, sizeof(i));
 
-    for (int j = 0; j < 8; j++)
+    // 🔴 NORMALNE PER-WIERZCHOŁEK
+    for (int i = 0; i < 8; i++)
     {
-        colors[j][0] = (j & 1) ? 1.f : 0.f;
-        colors[j][1] = (j & 2) ? 1.f : 0.f;
-        colors[j][2] = (j & 4) ? 1.f : 0.f;
+        normals[i][0] = vertices[i][0];
+        normals[i][1] = vertices[i][1];
+        normals[i][2] = vertices[i][2];
+        normalize(normals[i]);
     }
-
-    // LAB 11 – najprostsze współrzędne tekstur
-    float t[8][2] = {
-        {0,0},{1,0},{1,1},{0,1},
-        {0,0},{1,0},{1,1},{0,1}
-    };
-    memcpy(texCoords, t, sizeof(t));
 }
 
 void Cube::draw()
 {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    GLfloat matDiff[] = { 0.8f, 0.2f, 0.2f, 1.0f };
+    GLfloat matSpec[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glColorPointer(3, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matDiff);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+    glMateriali(GL_FRONT, GL_SHININESS, 64);
 
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, indices);
+    glBegin(GL_TRIANGLES);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    for (int i = 0; i < 36; i++)
+    {
+        unsigned int idx = indices[i];
+        glNormal3fv(normals[idx]);     // 🔴 różna normalna
+        glVertex3fv(vertices[idx]);
+    }
+
+    glEnd();
 }
