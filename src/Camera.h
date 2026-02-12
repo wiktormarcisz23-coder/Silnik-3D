@@ -2,17 +2,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-class Camera
-{
+class Camera {
 public:
-    Camera();
-    glm::mat4 getView() const;
-
-    void moveForward(float d);
-    void moveRight(float d);
-
+	Camera();
+	glm::mat4 getView() const;
+	glm::vec3 getPosition() const;
+	void moveRight(float d);
+	void moveUp(float d);
 private:
-    glm::vec3 position;
-    glm::vec3 target;
-    glm::vec3 up;
+	glm::vec3 position;
+	glm::vec3 target;
+	glm::vec3 up;
 };

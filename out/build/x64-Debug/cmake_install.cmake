@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/wikto/Downloads/Silnik-3D-main - 1/Silnik-3D-main
+# Install script for directory: C:/Users/123/Desktop/Silnik-3D-main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/wikto/Downloads/Silnik-3D-main - 1/Silnik-3D-main/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/123/Desktop/Silnik-3D-main/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -35,7 +35,7 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/wikto/Downloads/Silnik-3D-main - 1/Silnik-3D-main/out/build/x64-Debug/install_local_manifest.txt"
+  file(WRITE "C:/Users/123/Desktop/Silnik-3D-main/out/build/x64-Debug/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -51,6 +51,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/wikto/Downloads/Silnik-3D-main - 1/Silnik-3D-main/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/123/Desktop/Silnik-3D-main/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

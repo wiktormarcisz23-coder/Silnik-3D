@@ -1,28 +1,34 @@
 #include "Camera.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera()
+	: position(0.0f, 0.0f, 150.0f),
+	target(0.0f, 0.0f, 0.0f),
+	up(0.0f, 1.0f, 0.0f)
 {
-    position = glm::vec3(0, 0, 150);
-    target = glm::vec3(0, 0, 0);
-    up = glm::vec3(0, 1, 0);
 }
 
 glm::mat4 Camera::getView() const
 {
-    return glm::lookAt(position, target, up);
+	return glm::lookAt(position, target, up);
 }
 
-void Camera::moveForward(float d)
+glm::vec3 Camera::getPosition() const
 {
-    glm::vec3 dir = glm::normalize(target - position);
-    position += dir * d;
-    target += dir * d;
+	return position;
 }
 
 void Camera::moveRight(float d)
 {
-    glm::vec3 dir = glm::normalize(target - position);
-    glm::vec3 right = glm::normalize(glm::cross(dir, up));
-    position += right * d;
-    target += right * d;
+	glm::vec3 dir = glm::normalize(target - position);
+	glm::vec3 right = glm::normalize(glm::cross(dir, up));
+	position += right * d;
+	target += right * d;
+}
+
+void Camera::moveUp(float d)
+{
+	position += up * d;
+	target += up * d;
 }

@@ -1,150 +1,150 @@
-﻿#include "Engine.h"
+﻿#include <GL/glew.h>
+#include "Engine.h"
 #include <cstdlib>
-#include <cctype>
 
 Engine* Engine::instance = nullptr;
 
-Engine::Engine(int argc, char** argv)
-    : angle(0.0f),
-    lookA(20.0f),
-    width(800),
-    height(600),
-    lightPos(200.0f, 200.0f, 200.0f),
-    smoothShading(true)
+Engine::Engine(int argc, char** argv, int w, int h, const char* t)
+	: width(w), height(h),
+	angle(0.0f),
+	lightPos(100.0f, 100.0f, 200.0f),
+	shader(nullptr)
 {
-    instance = this;
+	instance = this;
+	glutInit(&argc, argv);
+	glutInitContextVersion(3, 3);
+	glutInitContextProfile(GLUT_CORE_PROFILE);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitWindowSize(width, height);
+	glutCreateWindow(t);
+	glutIgnoreKeyRepeat(1);
+	glewExperimental = GL_TRUE;
+	GLenum glewError = glewInit();
+	if (glewError != GLEW_OK)
+	{
+		std::exit(1);
+	}
+	lastTime = glutGet(GLUT_ELAPSED_TIME);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	shader = new Shader("vertex.glsl", "fragment.glsl");
+	cube = new Cube("texture.jpg");
+	objects.push_back(cube);
+	glutDisplayFunc(displayCallback);
+	glutReshapeFunc(reshapeCallback);
+	glutKeyboardFunc(keyboardCallback);
+	glutKeyboardUpFunc(keyboardUpCallback);
+	glutIdleFunc(idleCallback);
+}
 
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(width, height);
-    glutCreateWindow("LAB 9 + LAB 10 – Transformacje i oswietlenie");
-
-    glEnable(GL_DEPTH_TEST);
-
-    // ===== LAB 10 – OŚWIETLENIE =====
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-
-    GLfloat ambient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-    GLfloat diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-
-    // Spotlight (Warna)
-    glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 45.0f);
-    glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 15.0f);
-
-    glutDisplayFunc(displayCallback);
-    glutReshapeFunc(reshapeCallback);
-    glutKeyboardFunc(keyboardCallback);
-    glutIdleFunc(idleCallback);
+Engine::~Engine()
+{
+	delete shader;
+	for (auto obj : objects) delete obj;
 }
 
 void Engine::run()
 {
-    glutMainLoop();
+	glutMainLoop();
 }
 
-void Engine::displayCallback() { instance->display(); }
-void Engine::reshapeCallback(int w, int h) { instance->reshape(w, h); }
-void Engine::keyboardCallback(unsigned char key, int, int) { instance->keyboard(key); }
-void Engine::idleCallback() { instance->idle(); }
+void Engine::displayCallback()
+{
+	if (instance) instance->display();
+}
+
+void Engine::reshapeCallback(int w, int h)
+{
+	if (instance) instance->reshape(w, h);
+}
+
+void Engine::keyboardCallback(unsigned char key, int x, int y)
+{
+	if (instance) instance->keyboard(key);
+}
+
+void Engine::keyboardUpCallback(unsigned char key, int x, int y)
+{
+	if (instance) instance->keyboardUp(key);
+}
+
+void Engine::idleCallback()
+{
+	if (instance) instance->idle();
+}
 
 void Engine::display()
 {
-    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shader->use();
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
+	shader->setMat4("projection", projection);
+	shader->setMat4("view", camera.getView());
+	shader->setVec3("lightPos", lightPos);
+	shader->setVec3("viewPos", camera.getPosition());
 
-    glShadeModel(smoothShading ? GL_SMOOTH : GL_FLAT);
+	for (auto obj : objects)
+	{
+		obj->setRotation(glm::vec3(0.0f, angle, 0.0f));
+		shader->setMat4("model", obj->getModelMatrix());
+		obj->draw();
+	}
 
-    // ===== PROJECTION (LAB 9) =====
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glm::mat4 P = glm::perspective(
-        glm::radians(50.0f),
-        (float)width / height,
-        130.0f,
-        470.0f
-    );
-    glLoadMatrixf(glm::value_ptr(P));
-
-    // ===== VIEW – OBSERWATOR =====
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(glm::value_ptr(camera.getView()));
-
-    // ===== ŚWIATŁO (LAB 10) =====
-    GLfloat pos[] = { lightPos.x, lightPos.y, lightPos.z, 1.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, pos);
-
-    GLfloat dir[] = { -pos[0], -pos[1], -pos[2] };
-    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, dir);
-
-    // ===== MACIERZ SCENY (LAB 9) =====
-    glm::mat4 MatM(1.0f);
-    MatM = glm::translate(MatM, glm::vec3(0.0f, 0.0f, -300.0f));
-    MatM = glm::rotate(MatM, glm::radians(lookA), glm::vec3(1, 0, 0));
-    MatM = glm::rotate(MatM, glm::radians(angle), glm::vec3(0, 1, 0));
-
-    glm::mat4 MatRot120 = glm::rotate(
-        glm::mat4(1.0f),
-        glm::radians(120.0f),
-        glm::vec3(0, 1, 0)
-    );
-    glm::mat4 MatTra100 = glm::translate(
-        glm::mat4(1.0f),
-        glm::vec3(100.0f, 0, 0)
-    );
-
-    // ===== OBIEKTY =====
-    glLoadMatrixf(glm::value_ptr(MatM * MatTra100));
-    glColor3f(0, 1, 0);
-    glutSolidCube(50);
-
-    glLoadMatrixf(glm::value_ptr(MatM * MatRot120 * MatTra100));
-    glColor3f(1, 1, 0);
-    glutSolidTeapot(40);
-
-    glLoadMatrixf(glm::value_ptr(MatM * MatRot120 * MatRot120 * MatTra100));
-    glColor3f(0, 0, 1);
-    glutSolidSphere(50, 20, 20);
-
-    glutSwapBuffers();
+	glutSwapBuffers();
 }
-
 void Engine::reshape(int w, int h)
 {
-    width = w;
-    height = h;
-    glViewport(0, 0, w, h);
+	width = w;
+	height = h;
+	glViewport(0, 0, w, h);
+	glutPostRedisplay();
 }
 
 void Engine::keyboard(unsigned char key)
 {
-    key = (unsigned char)std::tolower(key);
+	key = std::tolower(key);
+	keys[key] = true;
+	switch (key)
+	{
+		case 27: exit(0); break;
+	}
+	glutPostRedisplay();
+}
 
-    switch (key)
-    {
-    case 27: exit(0);
-    case 'c': smoothShading = !smoothShading; break;
-
-        // sterowanie spotlightem
-    case 'w': lightPos.z -= 20; break;
-    case 's': lightPos.z += 20; break;
-    case 'a': lightPos.x -= 20; break;
-    case 'd': lightPos.x += 20; break;
-    case 'q': lightPos.y += 20; break;
-    case 'e': lightPos.y -= 20; break;
-    }
+void Engine::keyboardUp(unsigned char key)
+{
+	keys[std::tolower(key)] = false;
 }
 
 void Engine::idle()
 {
-    angle += 0.2f;
-    if (angle > 360.0f) angle -= 360.0f;
+	unsigned int currentTime = glutGet(GLUT_ELAPSED_TIME);
+	float deltaTime = (currentTime - lastTime) / 1000.0f;
+	lastTime = currentTime;
+	angle += rotationSpeed * deltaTime;
 
-    glutPostRedisplay();
+	if (angle >= 360.0f) angle -= 360.0f;
+	if (keys['d']) camera.moveRight(-moveSpeed * deltaTime);
+	if (keys['a']) camera.moveRight(moveSpeed * deltaTime);
+	if (keys['s']) camera.moveUp(moveSpeed * deltaTime);
+	if (keys['w']) camera.moveUp(-moveSpeed * deltaTime);
+
+	if (cube)
+	{
+		glm::vec3 currentScale = cube->getScale();
+
+		if (keys['+'] || keys['='])
+		{
+			currentScale += glm::vec3(scaleSpeed * deltaTime);
+		}
+
+		if (keys['-'] || keys['_'])
+		{
+			currentScale -= glm::vec3(scaleSpeed * deltaTime);
+			currentScale = glm::max(currentScale, glm::vec3(0.2f));
+		}
+
+		cube->setScale(currentScale);
+	}
+	glutPostRedisplay();
 }
